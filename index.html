@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies.</title>
+    <!-- Favicon for browser tab -->
+<link rel="icon" type="image" href="icon16.png">
+<link rel="icon" type="image" sizes="16x16" href="icon16.jpg">
+<link rel="icon" type="image" sizes="32x32" href="icon32.jpg">
+
+<!-- Android Chrome icons -->
+<link rel="icon" type="image" sizes="192x192" href="icon192.jpg">
+<link rel="icon" type="image" sizes="512x512" href="icon512.jpg">
+
+<!-- Apple Touch Icon (iPhone/iPad homescreen) -->
+<link rel="apple-touch-icon" href="icon300.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen">
+
+    <!-- Root Container -->
+    <div id="app-root" class="min-h-screen flex flex-col">
+    <!-- Content will be injected here -->
+    </div>
+    <template id="loading-template">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; text-align: center; background-color: var(--color-bg-dark);">
+            <div style="border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: var(--color-accent); border-bottom-color: var(--color-accent); border-radius: 50%; width: 4rem; height: 4rem; margin-bottom: 1rem; animation: spin 1s linear infinite;"></div>
+            <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">Connecting to StreamVerse...</h1>
+            <p style="color: var(--color-text-secondary);">Loading user session and real-time data.</p>
+        </div>
+    </template>
+
+    <template id="login-template">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2 id="auth-title"></h2>
+                <p style="font-size: 0.875rem; text-align: center; color:rgb(54, 54, 212); margin-bottom: 1rem;">Cinema is not just about watching, it’s about experiencing. Join us!</p>
+                <form id="auth-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div><label style="display: block; color: #ccc; margin-bottom:10px;" for="email">Email</label>
+                        <input type="email" id="email" required value="user@example.com"/></div>
+                    <div><label style="display: block; color: #ccc; margin-bottom: 0.25rem;" for="password">Password</label>
+                        <input type="password" id="password" required value="1234"/></div>
+                    <p id="auth-error" style="color: var(--color-watchlist); font-size: 0.875rem; display: none;"></p>
+                    <button type="submit" id="auth-submit-btn"></button>
+                </form>
+                <div style="text-align:center; margin-top:10px;">
+                    <button id="auth-toggle-btn"></button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="error-template">
+        <div class="auth-container">
+            <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2rem;">
+                <i data-lucide="zap" style="width: 4rem; height: 4rem; color: #f97316; margin-bottom: 1.5rem;"></i>
+                <h1 style="font-size: 3rem; font-weight: 800; color: white; margin-bottom: 1rem;">404 - Page Not Found</h1>
+                <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2rem;">Oops! The page you're looking for doesn't exist.</p>
+                <button style="padding: 0.75rem 1.5rem; background-color: var(--color-primary); color: white; font-weight: 700; border-radius: 9999px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);" onclick="window.navigate('dashboard')">Go to Home</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="modal-template">
+        <div class="modal-backdrop" id="detail-modal">
+            <div class="modal-content" id="modal-content-inner">
+                <div style="display: flex; justify-content: flex-end;">
+                    <button class="modal-close-btn" id="close-modal-btn"><i data-lucide="x" style="width: 1.5rem; height: 1.5rem;"></i></button>
+                </div>
+                <div class="modal-detail-flex">
+                    <img id="modal-poster" class="modal-poster" onerror="this.onerror=null;this.src='https://placehold.co/250x375/1f2937/d1d5db?text=Poster+Unavailable'" />
+                    <div class="modal-info">
+                        <h2 id="modal-title"></h2>
+                        <p id="modal-meta-info"></p>
+                        <div class="modal-meta">
+                            <span class="modal-rating" id="modal-rating-text"><i data-lucide="star" style="width: 1.25rem; height: 1.25rem; margin-right: 0.25rem; fill: var(--color-rating);"></i></span>
+                            <div id="modal-genres" style="display: flex; gap: 0.5rem;"></div>
+                        </div>
+                        <h3 class="modal-plot-title">Plot Summary</h3>
+                        <p id="modal-plot-text" class="modal-plot-text"></p>
+                        <button id="modal-watchlist-btn" class="modal-watchlist-btn"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+        <template id="footer-template">
+        <footer class="footer">
+            <div class="container">
+                <span class="footer-logo">StreamVerse</span>
+                <ul class="footer-links">
+                    <li class="footer-link"><a href="#" onclick="alert('Terms page is coming soon.'); return false;">Terms of Service</a></li>
+                    <li class="footer-link"><a href="#" onclick="alert('Privacy policy is coming soon.'); return false;">Privacy Policy</a></li>
+                    <li class="footer-link"><a href="#" onclick="alert('Contact details: support@streamverse.app'); return false;">Contact Us</a></li>
+                    <li class="footer-link"><a href="#" onclick="window.navigate('dashboard'); return false;">Discover</a></li>
+                </ul>
+                <p class="footer-copyright">&copy; 2025 StreamVerse. All rights reserved. (Built with JS/Firebase)</p>
+            </div>
+        </footer>
+    </template>
+
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        setLogLevel('Debug'); 
+        // --- Global Config and Constants ---
+        const ITEMS_PER_PAGE = 8;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+        let unsubscribeWatchlist = null;
+
+        // --- Global State ---
+        const state = {
+            isAuthReady: false, userId: null, isLoggedIn: false, currentScreen: 'login', watchlist: [],
+            selectedGenre: 'All', sortKey: 'Rating', searchTerm: '', currentPage: 1, selectedItem: null,
+        };
+
+        // --- Mock Data ---
+        const MOCK_DATA = [
+            { id: 1, title: "Kantara:Chapter 1", type: "Movie", year: 2025, rating: 10, genres: ["Thriller", "Action"], plot: "During the region of Kadamba;s, the first dynasty of Karnataka, bangra, a fictional feudatory ruled by king Vijayendra.known to have pledged his loyalty t the Kadambas, he holds the command over their sea trade. King vijayendra known for his valour is a feared leader who celebrated slavery and atheism", poster: "https://i.pinimg.com/1200x/e9/a1/bb/e9a1bbb7c6a73981288f54ef9a65b752.jpg" },
+            { id: 2, title: "Lucky Baskhar", type: "movie", year: 2024, rating: 7.5, genres: ["Drama", "Crime","Thriller"], plot: "A cash-strapped bank cashier embarks on a risky investment scheme and soon gets drawn into the murky world of money laundering.", poster: "https://i.pinimg.com/736x/c7/21/24/c721244ce531d713dd6b92c10b3e84cf.jpg" },
+            { id: 3, title: "The Game:You Never Play Alone", type: "Series", year: 2025, rating: 8.5, genres: ["Mystery", "Crime",], plot: "A career-driven game developer flights back against misogynistic expectations after she becomes the target of brtual attacks online and in real life.", poster: "https://images.justwatch.com/poster/336391453/s718/season-1.jpg" },
+            { id: 4, title: "The Fanily Men", type: "Series", year: 2019, rating: 7.7, genres: ["Drama", "Action","Adventure"], plot: "The story of middle class man who works for a special cell of the National investegation Agency. While terrorist, he also has to protect his family from the impact of his secretives,high pressure, and low paying job.", poster: "https://m.media-amazon.com/images/M/MV5BMDc3NWMwNGMtYjc3Mi00NzU5LWFiYjgtMTJjZGE3ZmFiNzRjXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" },
+            { id: 5, title: "grave of the Fireflies", type: "Anime", year: 1988, rating: 8.5, genres: ["Anime", "Adventure"], plot: "A young boy and his little sister struggle to servive in japan during world war II.", poster: "https://image.tmdb.org/t/p/original/qG3RYlIVpTYclR9TYIsy8p7m7AT.jpg" },
+            { id: 6, title: "Shaitaan", type: "Movie", year: 2024, rating: 6.4, genres: ["Horror", "Thriller"], plot: "Kabir and his family's fun weekend retreat takes terrifying turn when an intruder takes over the control of the body of his teenage daughter, putting her at the merecy of his increasingly sinister order.", poster: "https://m.media-amazon.com/images/M/MV5BYWNiYWU0M2ItM2ZlOC00NDRmLTk0MWQtM2Y2MjAxNjI5MzUzXkEyXkFqcGdeQXVyOTI3MzI4MzA@._V1_FMjpg_UX1000_.jpg" },
+            { id: 7, title: "Sky Force", type: "Movie", year: 2015, rating: 6.6, genres: ["Action", "History","Thriller","War"], plot: "In the 1965 Indo-Pak War, India faces a devastating surprise attack. Wing Commander Ahuja leads a retaliatory strike, but Squadron Leader Vijaya goes missing after a heroic solo engagement against a superior enemy jet. Ahuja spends 23 years seeking the truth and uncovering a cover-up.", poster: "https://m.media-amazon.com/images/M/MV5BMmYxZTliN2YtZmY2ZC00MmEwLTlmM2ItY2JhNmM3NjEzYTdhXkEyXkFqcGc@._V1_.jpg" },
+            { id: 8, title: "Asur", type: "Series", year: 2020, rating: 7.9, genres: ["Mystery", "Drama","Crime"], plot: "Set in the backdrop of the mystical city of Varanasi, Asur follows Nikhil Nair, a forensic-expert-turned-teacher, who returns to his roots at the Central Bureau of Investigation, and along with his former mentor Dhananjay Rajpoot, finds himself caught in a cat-and-mouse game with a brutal serial killer. What follows is a blend of suspense, mythology and the murders of some people totally unrelated.", poster: "https://www.scrolldroll.com/wp-content/uploads/2021/08/asur-web-series-on-voot.jpg" },
+            { id: 9, title: "Wind Breaker", type: "Anime", year: 2024, rating: 8.1, genres: ["Action", "Adventure", "Anime"], plot: "Furin High School's delinquents get bad grades, but they excel at protecting their town.Then a victory-obsessed newcomer threatens the balance of power", poster: "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/04/wind-breaker-anime.jpg" },
+            { id: 10, title: "Son of sardaar 2", type: "Movie", year: 2025, rating: 8.4, genres: ["Comedy", "Drama"], plot: "Years after settling an epic family feud and surviving house arrest in Punjab, Jassi Singh Randhawa returns this time chasing love, not trouble. But when he lands in Scotland to win back his estranged wife, he stumbles into a hostage crisis, a mafia war and the most bizarre Sardaar wedding of the century.", poster: "https://stat5.bollywoodhungama.in/wp-content/uploads/2025/06/Son-Of-Sardaar-2-01.jpg" },
+            { id: 11, title: "Hustlers", type: "Series", year: 2024, rating: 8.3, genres: ["Drama", "Family"], plot: "Amid familial rivalry,Manoj's chota bhai rises above, securing a spot at the Indian Institute of Engineering through intellect. Emerging as a national sensation, he disrupts the startup scene, embodying the true Indian hustler spirit", poster: "https://m.media-amazon.com/images/M/MV5BNDRlYTA0ZTMtNDc1NC00OWEzLTllODMtNTdkYjM2OTYxYTk5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" },
+            { id: 12, title: "Mitti-Ek Nayi Pehchaan", type: "Series", year: 2025, rating: 8.2, genres: ["Drama"], plot: "A successful corporate executive finds himself torn between his urban life and rural roots, as past family bonds and a new connection with a District Collector reshape his path.", poster: "https://img.airtel.tv/unsafe/fit-in/500x0/filters:format(webp)/https://xstreamcp-assets-msp.streamready.in/assets/MINITV/SERIES/686d8fabb2fcae5353aefe68/images/SQUARE/Mitti_1x1.jpg?o=production" },
+            { id: 13, title: "Tumse Na Ho paayega", type: "Movie", year: 2023, rating:7.6, genres: ["Comedy"], plot: "In a hilarious turn of events, Gaurav and his friends rediscover themselves when they decide to follow their hearts and defy the expectations of society.", poster: "https://image.tmdb.org/t/p/original/ziz7A8NgRExxeCxmTYGE6VGuMKs.jpg" },
+            { id: 14, title: "Saiyaara", type: "Movie", year: 2025, rating: 6.4, genres: ["Drama", "Romance"], plot: "Vaani and Krish will have to navigate life, their problems, their insecurities to hopefully realise that only love can be the answer to everything.", poster: "https://m.media-amazon.com/images/M/MV5BNTEyYjI2NjEtMjU1Ni00Yzc1LWFmZTQtNmQzM2FhYzE2MjNlXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" },
+            { id: 15, title: "Drishyam", type: "Movie", year: 2015, rating: 7.6, genres: ["Crime", "Mystery","Thriller","Drama"], plot: "A simple  street smart man tries to protect his family from a cop looking for her missing son who was accidently killed by his daughter.", poster: "https://m.media-amazon.com/images/M/MV5BYmJhZmJlYTItZmZlNy00MGY0LTg0ZGMtNWFkYWU5NTA1YTNhXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_.jpg" },
+            { id: 16, title: "Drishyam 2", type: "Movie", year: 2022, rating: 8.2, genres: ["Crime", "Mystery","Thriller","Drama"], plot: "A gripping tale of an investigation and a family which is threatened by it. Will Vijay Salgaonkar be able to protect his family this time?", poster: "https://static.tnn.in/photo/msid-96522055/96522055.jpg" },
+         ];
+        const ALL_GENRES = ["All", "Action", "Sci-Fi", "Drama", "Historical", "Anime", "Crime", "Thriller","Romance", "Fantasy", "Adventure", "Comedy", "Horror","Anime", "Mystery", "Documentary", "Nature", "Post-Apocalyptic"];
+        function getWatchlistDocRef(userId) {
+            return (db && userId) ? doc(db, 'artifacts', appId, 'users', userId, 'watchlist', 'items') : null;
+        }
+
+        function setupWatchlistListener(userId) {
+            if (unsubscribeWatchlist) unsubscribeWatchlist();
+            const watchlistRef = getWatchlistDocRef(userId);
+            if (!watchlistRef) return;
+
+            unsubscribeWatchlist = onSnapshot(watchlistRef, (docSnap) => {
+                const data = docSnap.exists() ? docSnap.data() : { itemIds: [] };
+                state.watchlist = data.itemIds || [];
+                console.log("Watchlist updated:", state.watchlist.length);
+                renderApp();
+            }, (error) => {
+                console.error("Watchlist listener error:", error);
+                state.watchlist = []; 
+                renderApp();
+            });
+        }
+
+        async function toggleWatchlist(itemId) {
+            const itemIdStr = String(itemId);
+            const watchlistRef = getWatchlistDocRef(state.userId);
+
+            if (!watchlistRef) { console.warn("Watchlist blocked: User ID unavailable."); return; }
+            
+            const newWatchlist = [...state.watchlist];
+            const index = newWatchlist.indexOf(itemIdStr);
+
+            if (index > -1) { newWatchlist.splice(index, 1); } else { newWatchlist.push(itemIdStr); }
+            
+            try { await setDoc(watchlistRef, { itemIds: newWatchlist }); } 
+            catch (e) { console.error("Error updating Firestore:", e); }
+        }
+        // Helper function for rendering select options (still HTML string, but small and focused helper)
+        const renderSelectOptions = (options, selectedValue) => 
+            options.map(g => `<option value="${g}" ${selectedValue === g ? 'selected' : ''}>${g}</option>`).join('');
+
+        // Main render function
+        const renderApp = () => {
+            const root = document.getElementById('app-root');
+            if (!root) return;
+
+            if (!state.isAuthReady) {
+                root.innerHTML = document.getElementById('loading-template').innerHTML;
+                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+                return;
+            }
+
+            root.innerHTML = '';
+            if (state.currentScreen !== 'login' && state.currentScreen !== 'signup') root.appendChild(renderHeader());
+
+            const mainContent = document.createElement('main');
+            mainContent.className = "main-content"; 
+            
+            switch (state.currentScreen) {
+                case 'dashboard': mainContent.appendChild(renderDashboardScreen()); break;
+                case 'watchlist': mainContent.appendChild(renderWatchlistScreen()); break;
+                case 'login':
+                case 'signup': mainContent.appendChild(renderLoginScreen()); break;
+                default: mainContent.appendChild(renderErrorScreen()); break;
+            }
+            root.appendChild(mainContent);
+
+            if (state.selectedItem) root.appendChild(renderDetailModal(state.selectedItem));
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        };
+
+        // --- Screen Rendering (Using pure DOM for complex elements) ---
+
+        const renderHeader = () => {
+            const nav = document.createElement('nav');
+            nav.className = "header";
+
+            const container = document.createElement('div');
+            container.className = "container header-content";
+
+            // Left side (Logo and Nav Links)
+            const leftDiv = document.createElement('div');
+            leftDiv.style.cssText = "display: flex; align-items: center; gap: 1.5rem;";
+            leftDiv.className = "nav-links";
+
+            const logo = document.createElement('a');
+            logo.href = "#";
+            logo.className = "logo";
+            logo.textContent = "Movies.";
+            logo.onclick = (e) => { e.preventDefault(); window.navigate('dashboard'); };
+            
+            const createNavButton = (screen, icon, text, isWatchlist) => {
+                const btn = document.createElement('button');
+                btn.textContent = ` ${text}`;
+                btn.className = state.currentScreen === screen ? 'active' : '';
+                // Note: CSS classes are defined in <style>, inline style is used only for layout/icon color
+                btn.style.cssText = "display: flex; align-items: center; color: #ccc; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-weight: 500; transition: background-color 0.3s, color 0.3s;";
+                btn.onclick = () => window.navigate(screen);
+                const iconStyle = isWatchlist ? 'color: var(--color-watchlist);' : '';
+                btn.insertAdjacentHTML('afterbegin', `<i data-lucide="${icon}" style="width: 1.25rem; height: 1.25rem; margin-right: 0.25rem; ${iconStyle}"></i>`);
+                return btn;
+            };
+
+            leftDiv.appendChild(logo);
+            leftDiv.appendChild(createNavButton('dashboard', 'film', 'Discover', false));
+            leftDiv.appendChild(createNavButton('watchlist', 'list', 'Watchlist', true));
+
+            // Right side (User ID and Logout)
+            const rightDiv = document.createElement('div');
+            rightDiv.style.cssText = "display: flex; align-items: center; gap: 1rem;";
+
+            const userIdSpan = document.createElement('span');
+            userIdSpan.style.cssText = "font-size: 0.75rem; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;";
+            userIdSpan.title = `Firestore User ID: ${state.userId}`;
+            userIdSpan.textContent = `User ID: ${state.userId ? state.userId.substring(0, 8) + '...' : 'Guest'}`;
+
+            const logoutBtn = document.createElement('button');
+            logoutBtn.className = "logout-btn";
+            logoutBtn.onclick = window.handleLogout;
+            logoutBtn.insertAdjacentHTML('beforeend', `<i data-lucide="log-out" style="width: 1.25rem; height: 1.25rem;"></i>`);
+
+            rightDiv.appendChild(userIdSpan);
+            rightDiv.appendChild(logoutBtn);
+
+            container.appendChild(leftDiv);
+            container.appendChild(rightDiv);
+            nav.appendChild(container);
+            
+            return nav;
+        };
+
+        const renderLoginScreen = () => {
+            const template = document.getElementById('login-template');
+            const clone = template.content.cloneNode(true);
+            const container = clone.querySelector('.auth-container');
+
+            const isSignup = state.currentScreen === 'signup';
+            
+            container.querySelector('#auth-title').textContent = isSignup ? 'Sign Up' : 'Login';
+            container.querySelector('#auth-submit-btn').textContent = isSignup ? 'Sign Up' : 'Log In';
+            
+            const toggleBtn = container.querySelector('#auth-toggle-btn');
+            toggleBtn.textContent = isSignup ? 'Already have an account? Log In' : 'Need an account? Sign Up';
+            toggleBtn.onclick = () => window.navigate(isSignup ? 'login' : 'signup');
+
+            container.querySelector('#auth-form').addEventListener('submit', handleLoginSubmit);
+            return container;
+        };
+
+        const renderErrorScreen = () => {
+            const template = document.getElementById('error-template');
+            const clone = template.content.cloneNode(true);
+            return clone.querySelector('.auth-container');
+        };
+
+        const renderDashboardScreen = () => {
+            const dashboard = document.createElement('div');
+            dashboard.className = "container"; 
+            const title = document.createElement('h1');
+            title.className = "screen-title";
+            title.textContent = "Watch • Explore • Enjoy";
+            dashboard.appendChild(title);
+
+            const controls = document.createElement('div');
+            controls.className = "controls-panel"; 
+            
+            // Search Input
+            const searchDiv = document.createElement('div');
+            searchDiv.className = "search-input";
+            searchDiv.innerHTML = `<input type="text" placeholder="Search by title..." value="${state.searchTerm}" id="search-input"/>`;
+            controls.appendChild(searchDiv);
+
+            // Genre Filter
+            const genreDiv = document.createElement('div');
+            genreDiv.className = "filter-select";
+            genreDiv.innerHTML = `<label style="color: #ccc; margin-right: 0.5rem; font-weight: 500; display: block;" for="genre-select">Genre:</label>
+                                    <select id="genre-select">${renderSelectOptions(ALL_GENRES, state.selectedGenre)}</select>`;
+            controls.appendChild(genreDiv);
+
+            // Sort By Filter
+            const sortDiv = document.createElement('div');
+            sortDiv.className = "filter-select";
+            sortDiv.innerHTML = `<label style="color: #ccc; margin-right: 0.5rem; font-weight: 500; display: block;" for="sort-select">Sort By:</label>
+                                <select id="sort-select">
+                                    <option value="Rating" ${state.sortKey === 'Rating' ? 'selected' : ''}>Rating (High to Low)</option>
+                                    <option value="Year" ${state.sortKey === 'Year' ? 'selected' : ''}>Year (Newest First)</option>
+                                </select>`;
+            controls.appendChild(sortDiv);
+
+            dashboard.appendChild(controls);
+
+            // Event listeners for controls
+            controls.querySelector('#search-input').addEventListener('input', (e) => { state.searchTerm = e.target.value; state.currentPage = 1; renderApp(); });
+            controls.querySelector('#genre-select').addEventListener('change', (e) => { state.selectedGenre = e.target.value; state.currentPage = 1; renderApp(); });
+            controls.querySelector('#sort-select').addEventListener('change', (e) => { state.sortKey = e.target.value; state.currentPage = 1; renderApp(); });
+
+            dashboard.appendChild(renderMediaGrid(MOCK_DATA, 'dashboard'));
+            return dashboard;
+        };
+
+        const renderWatchlistScreen = () => {
+            const watchlistScreen = document.createElement('div');
+            watchlistScreen.className = "container"; 
+            
+            const title = document.createElement('h1');
+            title.className = "screen-title watchlist-title";
+            title.style.cssText = "display: flex; align-items: center;";
+            title.innerHTML = `<i data-lucide="list" style="width: 2rem; height: 2rem; margin-right: 0.75rem;"></i> My Watchlist (${state.watchlist.length})`;
+            watchlistScreen.appendChild(title);
+
+            const watchlistItems = MOCK_DATA.filter(item => state.watchlist.includes(String(item.id)));
+
+            if (watchlistItems.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = "col-span-full";
+                emptyState.style.cssText = "text-align: center; padding: 3rem; background-color: var(--color-bg-light); border-radius: 0.75rem;";
+                emptyState.innerHTML = `<i data-lucide="heart" style="width: 3rem; height: 3rem; margin: 0 auto 1rem; color: #64748b;"></i><p style="font-size: 1.25rem; color: #ccc;">Your watchlist is empty. Add some titles from the Discover page!</p>`;
+                watchlistScreen.appendChild(emptyState);
+            } else {
+                watchlistScreen.appendChild(renderMediaGrid(watchlistItems, 'watchlist'));
+            }
+            return watchlistScreen;
+        };
+
+        const renderMediaGrid = (data, screenType) => {
+            const container = document.createElement('div');
+            let filteredData = data;
+            
+            // Filtering and Sorting Logic (kept short)
+            if (screenType === 'dashboard') {
+                if (state.searchTerm) filteredData = filteredData.filter(item => item.title.toLowerCase().includes(state.searchTerm.toLowerCase()));
+                if (state.selectedGenre !== 'All') filteredData = filteredData.filter(item => item.genres.includes(state.selectedGenre));
+                if (state.sortKey === 'Rating') filteredData.sort((a, b) => b.rating - a.rating); 
+                else if (state.sortKey === 'Year') filteredData.sort((a, b) => b.year - a.year);
+            }
+
+            const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+            const startIndex = (state.currentPage - 1) * ITEMS_PER_PAGE;
+            const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+            const grid = document.createElement('div');
+            grid.className = "media-grid"; 
+
+            if (paginatedData.length > 0) {
+                paginatedData.forEach(item => grid.appendChild(createMediaCard(item)));
+            } else if (screenType === 'dashboard') {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = "col-span-full";
+                emptyMessage.style.cssText = "text-align: center; padding: 3rem; background-color: var(--color-bg-light); border-radius: 0.75rem;";
+                emptyMessage.innerHTML = `<i data-lucide="zap" style="width: 3rem; height: 3rem; margin: 0 auto 1rem; color: var(--color-rating);"></i><p style="font-size: 1.25rem; color: #ccc;">No results found for your current filters/search.</p>`;
+                grid.appendChild(emptyMessage);
+            }
+
+            container.appendChild(grid);
+
+            if (totalPages > 1 && screenType === 'dashboard') {
+                const paginationDiv = document.createElement('div');
+                paginationDiv.className = "pagination"; 
+                
+                const prevBtn = document.createElement('button');
+                prevBtn.id = "prev-page";
+                prevBtn.disabled = state.currentPage === 1;
+                prevBtn.innerHTML = `<i data-lucide="chevron-left" style="width: 1.25rem; height: 1.25rem;"></i>`;
+                prevBtn.addEventListener('click', () => { 
+                    if (state.currentPage > 1) { 
+                        state.currentPage--; 
+                        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                        renderApp(); 
+                    } 
+                });
+
+                const pageSpan = document.createElement('span');
+                pageSpan.style.cssText = "font-size: 1.125rem; color: white; font-weight: 500;";
+                pageSpan.textContent = `Page ${state.currentPage} of ${totalPages}`;
+
+                const nextBtn = document.createElement('button');
+                nextBtn.id = "next-page";
+                nextBtn.disabled = state.currentPage === totalPages;
+                nextBtn.innerHTML = `<i data-lucide="chevron-right" style="width: 1.25rem; height: 1.25rem;"></i>`;
+                nextBtn.addEventListener('click', () => { 
+                    if (state.currentPage < totalPages) { 
+                        state.currentPage++; 
+                        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                        renderApp(); 
+                    } 
+                });
+
+                paginationDiv.appendChild(prevBtn);
+                paginationDiv.appendChild(pageSpan);
+                paginationDiv.appendChild(nextBtn);
+                container.appendChild(paginationDiv);
+            }
+            return container;
+        };
+
+        const createMediaCard = (item) => {
+            const isWatchlisted = state.watchlist.includes(String(item.id));
+            const card = document.createElement('div');
+            card.className = "media-card"; 
+            card.addEventListener('click', (e) => { if (!e.target.closest('.watchlist-btn')) handleShowDetails(item); });
+
+            const watchlistClass = isWatchlisted ? 'added' : '';
+            const genresHtml = item.genres.slice(0, 2).map(g => `<span class="genre-tag">${g}</span>`).join('');
+            const buttonText = isWatchlisted ? 'Added' : 'Add';
+            const iconFill = isWatchlisted ? 'fill: white;' : '';
+
+            // --- Card Structure (Using DOM APIs instead of large template string) ---
+            
+            // 1. Image & Rating Container
+            const imgContainer = document.createElement('div');
+            imgContainer.style.position = 'relative';
+
+            const img = document.createElement('img');
+            img.src = item.poster;
+            img.alt = item.title;
+            img.onerror = function() { this.onerror=null; this.src='https://placehold.co/250x375/1f2937/d1d5db?text=Poster+Unavailable'; };
+            imgContainer.appendChild(img);
+
+            const ratingBadge = document.createElement('div');
+            ratingBadge.className = "rating-badge";
+            ratingBadge.innerHTML = `<i data-lucide="star" style="width: 1rem; height: 1rem; margin-right: 0.25rem; fill: #1f2937;"></i>${item.rating.toFixed(1)}`;
+            imgContainer.appendChild(ratingBadge);
+            
+            card.appendChild(imgContainer);
+
+            // 2. Card Body
+            const body = document.createElement('div');
+            body.className = "card-body";
+            
+            const title = document.createElement('h3');
+            title.textContent = item.title;
+            body.appendChild(title);
+
+            const meta = document.createElement('p');
+            meta.textContent = `${item.type} | ${item.year}`;
+            body.appendChild(meta);
+
+            const genreDiv = document.createElement('div');
+            genreDiv.style.cssText = "display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;";
+            genreDiv.innerHTML = genresHtml;
+            body.appendChild(genreDiv);
+
+            // 3. Button Group
+            const btnGroup = document.createElement('div');
+            btnGroup.className = "button-group";
+
+            const watchlistBtn = document.createElement('button');
+            watchlistBtn.className = `watchlist-btn ${watchlistClass}`;
+            watchlistBtn.dataset.id = item.id;
+            watchlistBtn.title = isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist';
+            watchlistBtn.innerHTML = `<i data-lucide="heart" style="width: 1.25rem; height: 1.25rem; ${iconFill}"></i>
+                                      <span style="margin-left: 0.25rem;">${buttonText}</span>`;
+            
+            watchlistBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleWatchlist(item.id); });
+            
+            btnGroup.appendChild(watchlistBtn);
+            body.appendChild(btnGroup);
+            
+            card.appendChild(body);
+            
+            return card;
+        };
+
+        const renderDetailModal = (item) => {
+            const template = document.getElementById('modal-template');
+            const modal = template.content.cloneNode(true).querySelector('.modal-backdrop');
+            
+            const isWatchlisted = state.watchlist.includes(String(item.id));
+            const watchlistClass = isWatchlisted ? 'added' : '';
+            const heartIcon = isWatchlisted ? 'trash-2' : 'heart';
+            const heartFill = !isWatchlisted ? 'fill: white;' : '';
+            const buttonText = isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist';
+            const genresHtml = item.genres.map(g => `<span class="modal-genre-tag">${g}</span>`).join('');
+            
+            // Set dynamic content (using template selectors)
+            modal.querySelector('#modal-poster').src = item.poster;
+            modal.querySelector('#modal-poster').alt = item.title;
+            modal.querySelector('#modal-title').textContent = item.title;
+            modal.querySelector('#modal-meta-info').textContent = `${item.type} (${item.year})`;
+            modal.querySelector('#modal-rating-text').insertAdjacentHTML('beforeend', item.rating.toFixed(1) + ' / 10');
+            modal.querySelector('#modal-genres').innerHTML = genresHtml;
+            modal.querySelector('#modal-plot-text').textContent = item.plot;
+
+            // Set dynamic button attributes and content
+            const watchlistBtn = modal.querySelector('#modal-watchlist-btn');
+            watchlistBtn.className = `modal-watchlist-btn ${watchlistClass}`;
+            watchlistBtn.dataset.id = item.id;
+            watchlistBtn.innerHTML = `<i data-lucide="${heartIcon}" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; ${heartFill}"></i>${buttonText}`;
+
+            // Attach event listeners
+            modal.addEventListener('click', (e) => { if (e.target.id === 'detail-modal') window.handleCloseDetails(); });
+            modal.querySelector('#close-modal-btn').addEventListener('click', window.handleCloseDetails);
+            watchlistBtn.addEventListener('click', (e) => {
+                const itemId = e.currentTarget.dataset.id;
+                toggleWatchlist(itemId);
+                state.selectedItem = MOCK_DATA.find(i => String(i.id) === itemId);
+            });
+            return modal;
+        };
+        const navigate = (screen) => {
+            if (state.isAuthReady && (state.isLoggedIn || screen === 'login' || screen === 'signup')) {
+                state.currentScreen = screen; state.currentPage = 1; renderApp();
+            } else { state.currentScreen = 'login'; renderApp(); }
+        };
+        window.navigate = navigate;
+
+        const handleLoginSubmit = (e) => {
+            e.preventDefault();
+            const email = e.target.querySelector('#email').value;
+            const password = e.target.querySelector('#password').value;
+            const errorElement = e.target.querySelector('#auth-error');
+
+            errorElement.style.display = 'none';
+            if (email.length < 5 || password.length < 4) {
+                errorElement.textContent = 'Please use a mock email (min 5 chars) and password (min 4 chars).';
+                errorElement.style.display = 'block';
+                return;
+            }
+            setTimeout(() => { state.isLoggedIn = true; navigate('dashboard'); }, 500);
+        };
+
+        const handleLogout = async () => {
+            try { await signOut(auth); } catch (e) { console.error("Error signing out:", e); }
+            state.isLoggedIn = false; state.selectedGenre = 'All'; state.sortKey = 'Rating';
+            state.searchTerm = ''; state.currentPage = 1; navigate('login');
+        };
+        window.handleLogout = handleLogout;
+
+        const handleShowDetails = (item) => { state.selectedItem = item; renderApp(); };
+        const handleCloseDetails = () => { state.selectedItem = null; renderApp(); };
+        window.handleCloseDetails = handleCloseDetails;
+
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app);
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        state.userId = user.uid; state.isLoggedIn = true; 
+                        setupWatchlistListener(user.uid);
+                        if (state.currentScreen === 'login' || state.currentScreen === 'signup') state.currentScreen = 'dashboard';
+                    } else {
+                        state.userId = null; state.isLoggedIn = false; state.watchlist = [];
+                        if (unsubscribeWatchlist) { unsubscribeWatchlist(); unsubscribeWatchlist = null; }
+                        if (state.isAuthReady && state.currentScreen !== 'login') state.currentScreen = 'login';
+                    }
+                    state.isAuthReady = true; renderApp(); 
+                });
+                if (initialAuthToken) await signInWithCustomToken(auth, initialAuthToken);
+                else await signInAnonymously(auth);
+            } catch (error) { console.error("Firebase Init Error:", error); state.isAuthReady = true; state.currentScreen = 'error'; renderApp(); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Object.keys(firebaseConfig).length === 0) {
+                 console.error("Firebase config missing. Using mock auth.");
+                 state.isAuthReady = true; state.currentScreen = 'login'; renderApp();
+            } else { initializeFirebase(); }
+        });
+    </script>
+    
+    <!-- Firebase SDKs are imported as type="module" -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</body>
+</html>
