@@ -30,9 +30,10 @@ Movies is a frontend-only website for Movies/Series/Anime. Users can browse, fil
 2. Open index.html in your browser.  
 
 ## 📸 Screenshots
-### Home Page
-![Screenshot](img1.png/)
- 
+### login page ### Home page
+![Screenshot](login.png/)
+### Home page
+ ![Screenshot](home1.png/)(home2.png/)(home3.png/)
 
 ## 📌 Future Improvements
 - Add backend 
