@@ -107,7 +107,6 @@ import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, 
 import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         setLogLevel('Debug'); 
-        // --- Global Config and Constants ---
         const ITEMS_PER_PAGE = 8;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
@@ -177,11 +176,9 @@ import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.
             try { await setDoc(watchlistRef, { itemIds: newWatchlist }); } 
             catch (e) { console.error("Error updating Firestore:", e); }
         }
-        // Helper function for rendering select options (still HTML string, but small and focused helper)
         const renderSelectOptions = (options, selectedValue) => 
             options.map(g => `<option value="${g}" ${selectedValue === g ? 'selected' : ''}>${g}</option>`).join('');
 
-        // Main render function
         const renderApp = () => {
             const root = document.getElementById('app-root');
             if (!root) return;
@@ -211,8 +208,6 @@ import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.
             if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
         };
 
-        // --- Screen Rendering (Using pure DOM for complex elements) ---
-
         const renderHeader = () => {
             const nav = document.createElement('nav');
             nav.className = "header";
@@ -235,7 +230,6 @@ import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.
                 const btn = document.createElement('button');
                 btn.textContent = ` ${text}`;
                 btn.className = state.currentScreen === screen ? 'active' : '';
-                // Note: CSS classes are defined in <style>, inline style is used only for layout/icon color
                 btn.style.cssText = "display: flex; align-items: center; color: #ccc; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-weight: 500; transition: background-color 0.3s, color 0.3s;";
                 btn.onclick = () => window.navigate(screen);
                 const iconStyle = isWatchlist ? 'color: var(--color-watchlist);' : '';
@@ -247,7 +241,7 @@ import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.
             leftDiv.appendChild(createNavButton('dashboard', 'film', 'Discover', false));
             leftDiv.appendChild(createNavButton('watchlist', 'list', 'Watchlist', true));
 
-            // Right side (User ID and Logout)
+            // Right side 
             const rightDiv = document.createElement('div');
             rightDiv.style.cssText = "display: flex; align-items: center; gap: 1rem;";
 
@@ -368,7 +362,6 @@ import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.
             const container = document.createElement('div');
             let filteredData = data;
             
-            // Filtering and Sorting Logic (kept short)
             if (screenType === 'dashboard') {
                 if (state.searchTerm) filteredData = filteredData.filter(item => item.title.toLowerCase().includes(state.searchTerm.toLowerCase()));
                 if (state.selectedGenre !== 'All') filteredData = filteredData.filter(item => item.genres.includes(state.selectedGenre));
@@ -446,7 +439,7 @@ import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.
             const buttonText = isWatchlisted ? 'Added' : 'Add';
             const iconFill = isWatchlisted ? 'fill: white;' : '';
 
-            // --- Card Structure (Using DOM APIs instead of large template string) ---
+            // --- Card Structure  ---
             
             // 1. Image & Rating Container
             const imgContainer = document.createElement('div');
@@ -514,7 +507,7 @@ import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.
             const buttonText = isWatchlisted ? 'Remove from Watchlist' : 'Add to Watchlist';
             const genresHtml = item.genres.map(g => `<span class="modal-genre-tag">${g}</span>`).join('');
             
-            // Set dynamic content (using template selectors)
+            // Set dynamic content 
             modal.querySelector('#modal-poster').src = item.poster;
             modal.querySelector('#modal-poster').alt = item.title;
             modal.querySelector('#modal-title').textContent = item.title;

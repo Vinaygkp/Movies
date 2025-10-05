@@ -458,7 +458,7 @@
         .modal-watchlist-btn:not(.added):hover {
             background-color: var(--color-primary);
         }
-        /* Animation for Loading Screen (copied from JS file) */
+        /* Animation for Loading Screen  */
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
